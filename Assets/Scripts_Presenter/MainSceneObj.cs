@@ -17,7 +17,7 @@ namespace Avatye.Pointhome.Public
 
         public void OnButtonClick()
         {
-            LogTracer.I($"{NAME} -> onButtonClick");            
+            LogTracer.I($"{NAME} -> onButtonClick");
             OpenPointHome();
         }
 
@@ -36,23 +36,43 @@ namespace Avatye.Pointhome.Public
                 appSecret: "17293bec4d454bdf",
                 onSuccess: () =>
                 {
-                    LogTracer.I($"{NAME} -> InitPointHome -> PointHomeUtil.Init");                    
+                    LogTracer.I($"{NAME} -> InitPointHome -> Init::onSuccess");
                 },
                 onFailure: (error) =>
                 {
-                    LogTracer.E($"{NAME} -> InitPointHome -> PointHomeUtil.InitError {error}");
+                    LogTracer.E($"{NAME} -> InitPointHome -> Init.onFailure {error}");
                 }
             );
         }
         private void OpenPointHome()
         {
             LogTracer.I($"{NAME} -> OpenPointHome()");
-        
-            PointHomeUtil.MakePointHomeBuilder(
-                openType: PointHomeUtil.OpenType.Float,
+                        
+            // PointHomeUtil.MakePointHomeBuilder(
+            //     userID: null,
+            //     sliderHeight: PointHomeUtil.OpenSliderHeight.Full,
+            //     onSuccess: () =>
+            //     {
+            //         LogTracer.I($"{NAME} -> OpenPointHome -> MakePointHomeBuilder::onSuccess");
+            //     },
+            //     onFailure: (error) =>
+            //     {
+            //         LogTracer.E($"{NAME} -> OpenPointHome -> MakePointHomeBuilder::onFailure {error}");
+            //     }
+            // );
+
+            PointHomeUtil.MakePointHomeFloatingBuilder(
                 userID: null,
-                sliderHeight: PointHomeUtil.OpenSliderHeight.Default,
-                buttonPosition: (10.0f, 10.0f)
+                sliderHeight: PointHomeUtil.OpenSliderHeight.Full,
+                buttonPosition: new Tuple<float, float>(10f, 10f),
+                 onSuccess: () =>
+                {
+                    LogTracer.I($"{NAME} -> OpenPointHome -> MakePointHomeFloatingBuilder::onSuccess");
+                },
+                onFailure: (error) =>
+                {
+                    LogTracer.E($"{NAME} -> OpenPointHome -> MakePointHomeFloatingBuilder::onFailure {error}");
+                }
             );
 
         }
