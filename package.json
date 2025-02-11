@@ -1,0 +1,21 @@
+{
+  "name": "com.unity.avatye.pointhome",
+  "version": "1.0.0",
+  "unity": "2025.1",
+  "keywords": ["SDK", "Hybrid", "Unity"],
+  "author": {
+    "name": "Avatye"
+  },
+  "dependencies": {
+    "com.google.android.gms:play-services-ads-identifier":"18.2.0",
+    "com.avatye.pointhome:product":"1.3.2.85.aa_SNAPSHOT",
+    "com.avatye.cashblock:ad-plus-applovin":"2.1.0.23",
+    "com.avatye.cashblock:ad-plus-cauly":"2.1.0.23",
+    "com.avatye.cashblock:ad-plus-fan":"2.1.0.23",
+    "com.avatye.cashblock:ad-plus-mezzomedia":"2.1.0.23",
+    "com.avatye.cashblock:ad-plus-pangle":"2.1.0.23",
+    "com.avatye.cashblock:ad-plus-unity":"2.1.0.23",
+    "com.avatye.cashblock:ad-plus-vungle":"2.1.0.23",
+    "com.avatye.cashblock:ad-plus-mobon":"2.1.0.23"
+  }
+}

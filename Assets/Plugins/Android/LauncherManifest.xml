@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:installLocation="preferExternal">
+    <supports-screens
+        android:smallScreens="true"
+        android:normalScreens="true"
+        android:largeScreens="true"
+        android:xlargeScreens="true"
+        android:anyDensity="true" />
+
+    <application android:label="@string/app_name"
+        android:icon="@mipmap/app_icon">
+        <meta-data
+            android:name="avatye.config.host"
+            android:value="qa" />
+        <meta-data
+            android:name="enable_ap_log"
+            android:value="enable" />
+        <meta-data
+            android:name="cashblock.config.log"
+            android:value="true" />
+
+        <activity
+            android:name="com.unity3d.player.UnityPlayerGameActivity"
+            android:hardwareAccelerated="true"
+            tools:replace="android:hardwareAccelerated" />
+
+    </application>
+</manifest>

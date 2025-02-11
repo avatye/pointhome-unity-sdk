@@ -1,0 +1,41 @@
+pluginManagement {
+    repositories {
+        **ARTIFACTORYREPOSITORY**
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+    }
+}
+
+include ':launcher', ':unityLibrary'
+**INCLUDES**
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositories {
+        **ARTIFACTORYREPOSITORY**
+        google()
+        mavenCentral()        
+// Android Resolver Repos Start
+        mavenLocal()
+// Android Resolver Repos End
+        maven {url "https://artifact.bytedance.com/repository/pangle"}
+        maven {url "https://devrepo.kakao.com/nexus/content/groups/public/"}
+        maven {url "https://dl.cloudsmith.io/public/avatye/Android-CashBlock/maven/"}
+        maven {url "https://dl.cloudsmith.io/public/avatye/Android-PointHome/maven/"}
+        maven {
+            url uri("s3://repo.cauly.net/releases")
+            credentials(AwsCredentials) {
+                accessKey = "AKIAWRZUK5MFKYVSUOLB"
+                secretKey = "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"
+            }
+        }
+         maven {
+            url "https://dl.cloudsmith.io/public/avatye/android-pointhome-internal/maven/"
+
+        }
+        flatDir {
+            dirs "${project(':unityLibrary').projectDir}/libs"
+        }
+    }
+}

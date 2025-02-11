@@ -1,0 +1,106 @@
+## ------------------------------------------ 내부
+
+
+# Unity 기본적인 JNI 및 Reflection 보호
+-keep class com.unity3d.** { *; }
+-keep class android.os.Handler { *; }
+-keep class android.os.Looper { *; }
+
+# Unity의 AndroidJavaObject 및 AndroidJavaRunnable 예외 처리
+-keep class com.unity3d.player.UnityPlayer { *; }
+-keepclassmembers class * extends android.app.Activity {
+    public void *(android.view.View);
+}
+
+# Android의 Reflection 관련 최적화 방지
+-keepattributes *Annotation*
+-keep class * extends java.lang.reflect.Proxy { *; }
+-keep class * extends android.os.Handler { *; }
+
+# Java lang
+-keep class java.lang.Float { *; } # Float 객체 전달에 필요
+-keep class * extends android.app.Activity { *; } # Activity 클래스
+
+## ------------------------------------------ 외부
+## POINTHOME
+-keeppackagenames com.avatye.pointhome.**
+-keep class com.avatye.pointhome.** { *; }
+
+## Cashblock-rules
+-keep class com.avatye.cashblock.** { *; }
+-keep class com.avatye.cashblock.library.** { *; }
+
+## Cashblock-rules 추가 / 미디에이션 적용 후 오류가 발생한 경우에만 추가
+
+## IGAWorks 관련 설정: IGAWorks SDK 클래스에 대한 난독화 예외 처리 및 경고 메시지 무시
+-keep class com.igaworks.ssp.** { *; }
+-keep class com.igaworks.ssp.R$* # R 클래스와 그 멤버들을 난독화에서 제외
+-dontwarn com.igaworks.ssp.** # IGAWorks 관련 경고 메시지 무시
+-keepclassmembers class com.igaworks.ssp.R$*{ # R 클래스 내의 정적 필드를 난독화에서 제외
+  public static <fields>;
+}
+
+## Unity Ads 관련 설정: Unity 광고 SDK 클래스에 대한 난독화 예외 처리
+-keep class com.unity3d.ads.** { *; }
+-keep class com.unity3d.services.** { *; }
+
+## Vungle 관련 설정: Vungle 광고 라이브러리와 관련된 특정 경고 메시지 무시
+-dontwarn com.vungle.warren.downloader.DownloadRequestMediator$Status
+-dontwarn com.vungle.warren.error.VungleError$ErrorCode
+-dontwarn com.google.android.gms.common.GoogleApiAvailabilityLight
+-dontwarn com.google.android.gms.ads.identifier.AdvertisingIdClient
+-dontwarn com.google.android.gms.ads.identifier.AdvertisingIdClient$Info
+-keep class com.moat.** { *; } # MOAT 광고 추적 라이브러리를 난독화에서 제외
+-dontwarn com.moat.** # MOAT 관련 경고 메시지 무시
+## Gson, 모든 애노테이션 및 서명 관련 속성, Data 객체의 멤버 보존
+-keepclassmembers,allowobfuscation class * {
+ @com.google.gson.annotations.SerializedName <fields>;
+}
+-keepattributes *Annotation*
+-keepattributes Signature
+
+## OkHttp
+-dontwarn javax.annotation.**
+-keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
+-dontwarn org.codehaus.mojo.animal_sniffer.*
+-dontwarn okhttp3.internal.platform.ConscryptPlatform
+
+## Pangle 관련 설정: Pangle 광고 라이브러리 클래스에 대한 난독화 예외 처리
+-keep class com.bytedance.sdk.** { *; }
+-keep class com.pgl.sys.ces.* { *; }
+
+## Facebook Audience Network(FAN) 관련 설정: Facebook 광고 SDK 클래스에 대한 난독화 예외 처리
+-keep class com.facebook.ads.** { *; }
+
+## Mobon 관련 설정: Mobon 광고 네트워크 클래스에 대한 난독화 예외 처리
+-dontwarn com.httpmodule.**
+-dontwarn com.imgmodule.**
+-keep class com.httpmodule.** { *; }
+-keep class com.imgmodule.** { *; }
+-keep public class com.mobon.** {
+  public *;
+}
+
+## Cauly - Mediation
+-keep class com.fsn.cauly.** {
+	  public *; protected *;
+}
+-keep class com.trid.tridad.** {
+ 	 public *; protected *;
+}
+
+## 디바이스 광고ID 
+-keep class com.google.android.gms.ads.identifier.** { *; }
+-keep class com.google.android.gms.** { *; }
+
+## 광고 라이브러리 및 서비스와 관련된 경고 메시지 무시
+-dontwarn com.adcolony.**
+-dontwarn com.bytedance.**
+-dontwarn com.mopub.**
+-dontwarn com.mintegral.**
+-dontwarn com.unity3d.**
+-dontwarn com.adobe.**
+-dontwarn com.fyber.**
+-dontwarn org.chromium.**
+-dontwarn com.fsn.cauly.**
+-dontwarn com.tapjoy.**
