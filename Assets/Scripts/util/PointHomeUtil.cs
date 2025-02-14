@@ -3,19 +3,17 @@ using UnityEngine;
 
 namespace Avatye.Pointhome.Util
 {
-    internal static class PointHomeUtil
+    public static class PointHomeUtil
     {
         private const string NAME = "PointHomeUtil";
+        private static readonly Tuple<float, float> DEFAULT_BUTTON_POSITION = new(10f, 10f);
 
         public delegate void OnSuccessDelegate();
         public delegate void OnFailureDelegate(string error);
 
-        public static event OnSuccessDelegate D_OnSuccess;
-        public static event OnFailureDelegate D_OnFailure;
-
         private static AndroidJavaObject pointHomeSlider;
 
-        public enum OpenType
+        private enum OpenType
         {
             Bottom,
             Float
@@ -28,19 +26,20 @@ namespace Avatye.Pointhome.Util
         }
 
 
-
-
         /** 포인트홈 초기화 */
-        internal static void Init(string appID, string appSecret, OnSuccessDelegate onSuccess, OnFailureDelegate onFailure)
+        /// <param name="appID">아바티에서 제공한 앱ID</param>
+        /// <param name="appSecret">아바티에서 제공한 앱Secret</param>
+        /// <param name="appSecret">아바티에서 제공한 앱Secret</param>        
+        /// <param name="onSuccess">초기화 성공 콜백</param>        
+        /// <param name="onFailure">초기화 실패 콜백</param>            
+        public static void Init(string appID, string appSecret, OnSuccessDelegate onSuccess, OnFailureDelegate onFailure)
         {
             LogTracer.I($"{NAME} -> Init [ appID: {appID}, appSecret, {appSecret} ]");
-            D_OnSuccess = onSuccess;
-            D_OnFailure = onFailure;
 
             using AndroidJavaClass unityPlayer = new("com.unity3d.player.UnityPlayer");
             using AndroidJavaObject activity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
             using AndroidJavaClass pointHomeSDK = new("com.avatye.pointhome.PointHomeSDK");
-            IInitListener listener = new();
+            IInitListener listener = new(onSuccess, onFailure);
 
             pointHomeSDK.CallStatic(
                 "initializer",
@@ -57,13 +56,18 @@ namespace Avatye.Pointhome.Util
             pointHomeSDK.CallStatic<AndroidJavaObject>("useExternalToken", false);
 
         }
-        private class IInitListener : AndroidJavaProxy
+        public class IInitListener : AndroidJavaProxy
         {
-            public IInitListener() : base("com.avatye.pointhome.PointHomeSDK$InitializationListener") { }
+            private OnSuccessDelegate _onInitSuccess;
+            private OnFailureDelegate _onInitFailure;
+            public IInitListener(OnSuccessDelegate onSuccess, OnFailureDelegate onFailure) : base("com.avatye.pointhome.PointHomeSDK$InitializationListener")
+            {
+
+            }
             public void onSuccess()
             {
                 LogTracer.I("PointHomeSDK: Initialization Success!");
-                D_OnSuccess?.Invoke();
+                _onInitSuccess?.Invoke();
             }
 
             // 실패 콜백
@@ -71,96 +75,89 @@ namespace Avatye.Pointhome.Util
             {
                 string errorMessage = error.Call<string>("toString");
                 LogTracer.E($"PointHomeSDK: Initialization onFailure {errorMessage}");
-                D_OnFailure?.Invoke(errorMessage);
+                _onInitFailure?.Invoke(errorMessage);
             }
 
-            public static implicit operator AndroidJavaObject(IInitListener v)
-            {
-                throw new NotImplementedException();
-            }
+
         }
 
 
-        /** 포인트홈 빌더생성 */
-        internal static void MakePointHomeBuilder(OpenType openType, string userID, OpenSliderHeight sliderHeight, (float, float) buttonPosition)
+        /** 포인트홈 빌더생성  */
+        /// <param name="userID">앱사에서 사용하고 있는 유저 키(고유키로만) </param>
+        /// <param name="sliderHeight">포인트홈 열리는 슬라이더 형태</param>        
+        public static void MakePointHomeBuilder(string userID, OpenSliderHeight sliderHeight, OnSuccessDelegate onSuccess, OnFailureDelegate onFailure)
         {
-            LogTracer.I($"{NAME} -> MakePointHomeBuilder [ openType: {openType.ToString().ToLower()}, userID: {userID}, sliderHeight: {((int)sliderHeight)}, buttonPositionX: {buttonPosition.Item1}, buttonPositionY: {buttonPosition.Item2} ]");
+            LogTracer.I($"{NAME} -> MakePointHomeBuilder [ userID: {userID}, sliderHeight: {((int)sliderHeight)} ]");
             using AndroidJavaClass unityPlayer = new("com.unity3d.player.UnityPlayer");
             using AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
             using AndroidJavaObject pointHomeService = new("com.avatye.pointhome.builder.PointHomeService");
 
-
-            float posX = buttonPosition.Item1;
-            float posY = buttonPosition.Item2;
-
-            string reqData = $"{{ \"openType\": \"{openType.ToString().ToLower()}\", \"userID\": \"{userID}\", \"sliderHeight\": \"{(int)sliderHeight}\", \"buttonPositionX\": \"{posX}\", \"buttonPositionY\": \"{posY}\" }}";
+            string reqData = $"{{ \"openType\": \"{OpenType.Bottom.ToString().ToLower()}\", \"userID\": \"{userID}\", \"sliderHeight\": \"{(int)sliderHeight}\" }}";
             LogTracer.I($"{NAME} -> MakePointHomeBuilder ->   {reqData}  ");
 
             pointHomeService.CallStatic(
               "pointHomeUnity",
               currentActivity,
               reqData,
-              new PointHomeBuilderCallback()
+              new PointHomeBuilderCallback(onSuccess, onFailure)
           );
-
-
-            // pointHomeService.CallStatic(
-            //     "pointHomeUnity",
-            //     currentActivity,
-            //     openType.ToString().ToLower(),              // bottom: 포인트홈 view 형태 // float : 포인트홈 플로팅 버튼형태
-            //     userID,                                     // 유저ID ? 채널링 : 일반
-            //     (int)sliderHeight,                          // 0 : Default크기, 1: Full 크기
-            //     posXObj,                                    // 플로팅 버튼 x 좌표 
-            //     posYObj,                                    // 플로팅 버튼 y 좌표                
-            //     new PointHomeBuilderCallback()
-            // );
-
-
-            // pointHomeService.CallStatic(
-            //     "pointHomeBuilder",
-            //     currentActivity,
-            //     userID,                
-            //     new PointHomeBuilderCallback()
-            // );
         }
 
 
-        internal static void MakePointHomeFloatBuilder(string userID)
+        /** 포인트홈 플로팅 버튼 빌더생성  */
+        /// <param name="userID"> 앱사에서 사용하고 있는 유저 키(고유키로만) </param>
+        /// <param name="sliderHeight">포인트홈 열리는 슬라이더 형태</param>        
+        /// <param name="buttonPosition">플로팅 버튼 위치값(x,y) </param>        
+        public static void MakePointHomeFloatingBuilder(string userID, OpenSliderHeight sliderHeight, OnSuccessDelegate onSuccess, OnFailureDelegate onFailure, Tuple<float, float> buttonPosition = null)
         {
-            LogTracer.I($"{NAME} -> MakeBuilder [ userID: {userID}]");
+            LogTracer.I($"{NAME} -> MakePointHomeBuilder [ userID: {userID}, sliderHeight: {((int)sliderHeight)}, buttonPositionX: {buttonPosition.Item1}, buttonPositionY: {buttonPosition.Item2} ]");
             using AndroidJavaClass unityPlayer = new("com.unity3d.player.UnityPlayer");
             using AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
             using AndroidJavaObject pointHomeService = new("com.avatye.pointhome.builder.PointHomeService");
+            float posX = buttonPosition?.Item1 ?? DEFAULT_BUTTON_POSITION.Item1;
+            float posY = buttonPosition?.Item2 ?? DEFAULT_BUTTON_POSITION.Item2;
+
+            string reqData = $"{{ \"openType\": \"{OpenType.Float.ToString().ToLower()}\", \"userID\": \"{userID}\", \"sliderHeight\": \"{(int)sliderHeight}\", \"buttonPositionX\": \"{posX}\", \"buttonPositionY\": \"{posY}\" }}";
+            LogTracer.I($"{NAME} -> MakePointHomeBuilder ->   {reqData}  ");
+
             pointHomeService.CallStatic(
-                "pointHomeFloatBuilder",
-                currentActivity,
-                null, // 플로팅버튼의 초기 위치설정
-                userID,
-                new PointHomeBuilderCallback()
-            );
+              "pointHomeUnity",
+              currentActivity,
+              reqData,
+              new PointHomeBuilderCallback(onSuccess, onFailure)
+          );
         }
 
-        private class PointHomeBuilderCallback : AndroidJavaProxy
+
+        public class PointHomeBuilderCallback : AndroidJavaProxy
         {
-            public PointHomeBuilderCallback()
-                : base("com.avatye.pointhome.builder.IBuilderCallback") { }
+            private OnSuccessDelegate _onBuildSuccess;
+            private OnFailureDelegate _onBuildFailure;
+            public PointHomeBuilderCallback(OnSuccessDelegate onSuccess, OnFailureDelegate onFailure)
+                : base("com.avatye.pointhome.builder.IBuilderCallback")
+            {
+                _onBuildSuccess = onSuccess;
+                _onBuildFailure = onFailure;
+            }
 
             public void onBuildCompleted(AndroidJavaObject builder)
             {
                 LogTracer.I($"{NAME} -> onBuildCompleted -> PointHome 초기화 성공!");
                 pointHomeSlider = builder;
-                Open();
+                _onBuildSuccess.Invoke();
             }
 
             public void onBuildFailed(AndroidJavaObject error)
             {
                 string errorMessage = error.Call<string>("toString");
                 LogTracer.E($"{NAME} -> onBuildFailed -> PointHome 초기화 실패: {errorMessage}");
+                _onBuildFailure.Invoke(errorMessage);
             }
         }
 
+
         /** 포인트홈 실행 */
-        private static void Open()
+        public static void Open()
         {
             LogTracer.I($"{NAME} -> Open ");
             if (pointHomeSlider != null)
