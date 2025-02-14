@@ -47,7 +47,7 @@
   },
   "scopedRegistries": [
     {
-      "name": "Pointhome_SDK",
+      "name": "pointhome-sdk",
       "url": "https://github.com/avatye/pointhome-unity-sdk.git",
       "scopes": [
         "com.pointhome.unity"
